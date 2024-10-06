@@ -116,6 +116,62 @@ class ImageConverterApp:
         input_image = Image.open(input_image_path)
         width, height = input_image.size
 
+        tile_width = width // x_tiles
+        tile_height = height // y_tiles
+
+        if width > (tile_width * x_tiles) or height > (tile_height * y_tiles):
+            target_width = x_tiles * tile_width
+            target_height = y_tiles * tile_height
+
+            input_image = input_image.resize((target_width, target_height), Image.LANCZOS)
+            width, height = input_image.size
+
+        if tile_width == 0 or tile_height == 0:
+            messagebox.showerror("Error", "Number of tiles is too high for the selected image size.")
+            return
+
+        output_image = Image.new("RGB", (width, height))
+
+        img_data = np.array(input_image)
+
+        for y in range(y_tiles):
+            for x in range(x_tiles):
+                box = (x * tile_width, y * tile_height, (x + 1) * tile_width, (y + 1) * tile_height)
+                tile = img_data[y * tile_height:(y + 1) * tile_height, x * tile_width:(x + 1) * tile_width]
+
+                if tile.size == 0:
+                    continue
+
+                common_color = self.most_common_color(tile)
+                closest_block = self.find_closest_block_color(common_color)
+
+                block_image = self.block_images[closest_block].resize((tile_width, tile_height), Image.LANCZOS)
+                output_image.paste(block_image, box)
+
+        base_name = os.path.splitext(os.path.basename(input_image_path))[0]
+        output_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{base_name}_converted.png")
+        
+        output_image.save(output_image_path)
+        messagebox.showinfo("Success", f"Conversion completed. Output image saved to {output_image_path}")
+
+        input_image_path = self.input_image_path.get()
+        x_tiles = int(self.x_tiles_entry.get())
+        y_tiles = int(self.y_tiles_entry.get())
+
+        if not input_image_path or not os.path.isfile(input_image_path):
+            messagebox.showerror("Error", "Please select a valid input image.")
+            return
+
+        if x_tiles > 99:
+            messagebox.showerror("Error", "Maximum number of X tiles is 99.")
+            return
+        if y_tiles > 53:
+            messagebox.showerror("Error", "Maximum number of Y tiles is 53.")
+            return
+
+        input_image = Image.open(input_image_path)
+        width, height = input_image.size
+
         if width > 5000 or height > 5000:
             messagebox.showerror("Error", "Image resolution is too high. Please select an image with lower resolution.")
             return
