@@ -35,6 +35,36 @@ blocks = {
     "Dark Brown Block": (64, 36, 6)
 }
 
+block_ids = {
+    "Grey Block": 164,
+    "Black Block": 166,
+    "White Block": 168,
+    "Red Block": 170,
+    "Orange Block": 172,
+    "Yellow Block": 174,
+    "Green Block": 176,
+    "Aqua Block": 178,
+    "Blue Block": 180,
+    "Purple Block": 182,
+    "Brown Block": 184,
+    "Pastel Pink Block": 510,
+    "Pastel Orange Block": 512,
+    "Pastel Yellow Block": 514,
+    "Pastel Green Block": 516,
+    "Pastel Aqua Block": 518,
+    "Pastel Blue Block": 520,
+    "Pastel Purple Block": 522,
+    "Dark Grey Block": 2012,
+    "Dark Red Block": 2014,
+    "Dark Orange Block": 2016,
+    "Dark Yellow Block": 2018,
+    "Dark Green Block": 2020,
+    "Dark Aqua Block": 2022,
+    "Dark Blue Block": 2024,
+    "Dark Purple Block": 2026,
+    "Dark Brown Block": 2028
+}
+
 class ImageConverterApp:
     def __init__(self, root):
         self.root = root
@@ -62,35 +92,15 @@ class ImageConverterApp:
         ttk.Label(self.frame, text="X Tiles ( Length ) :").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
         self.x_tiles_entry = ttk.Entry(self.frame, width=10)
         self.x_tiles_entry.grid(row=1, column=1, padx=5, pady=5)
-        self.x_tiles_entry.insert(0, "99")
+        self.x_tiles_entry.insert(0, "100")
 
         ttk.Label(self.frame, text="Y Tiles ( Width ) :").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
         self.y_tiles_entry = ttk.Entry(self.frame, width=10)
         self.y_tiles_entry.grid(row=2, column=1, padx=5, pady=5)
-        self.y_tiles_entry.insert(0, "53")
+        self.y_tiles_entry.insert(0, "54")
 
         self.convert_button = ttk.Button(self.frame, text="Convert", command=self.convert_image)
         self.convert_button.grid(row=3, column=0, columnspan=3, pady=20)
-        self.convert_button.bind("<Enter>", self.on_hover)
-        self.convert_button.bind("<Leave>", self.on_leave)
-
-        self.block_images = {}
-        self.load_block_images()
-
-    def on_hover(self, event):
-        event.widget['style'] = 'TButton'
-
-    def on_leave(self, event):
-        event.widget['style'] = 'TButton'
-
-    def load_block_images(self):
-        script_dir = os.path.dirname(os.path.abspath(__file__))
-        blocks_dir = os.path.join(script_dir, "blocks")
-
-        for block_name in blocks.keys():
-            image_path = os.path.join(blocks_dir, f"{block_name}.png")
-            if os.path.isfile(image_path):
-                self.block_images[block_name] = Image.open(image_path)
 
     def load_input_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.jpg;*.png;*.jpeg")])
@@ -106,11 +116,11 @@ class ImageConverterApp:
             messagebox.showerror("Error", "Please select a valid input image.")
             return
 
-        if x_tiles > 99:
-            messagebox.showerror("Error", "Maximum number of X tiles is 99.")
+        if x_tiles > 100:
+            messagebox.showerror("Error", "Maximum number of X tiles is 100.")
             return
-        if y_tiles > 53:
-            messagebox.showerror("Error", "Maximum number of Y tiles is 53.")
+        if y_tiles > 54:
+            messagebox.showerror("Error", "Maximum number of Y tiles is 54.")
             return
 
         input_image = Image.open(input_image_path)
@@ -130,82 +140,45 @@ class ImageConverterApp:
             messagebox.showerror("Error", "Number of tiles is too high for the selected image size.")
             return
 
-        output_image = Image.new("RGB", (width, height))
-
         img_data = np.array(input_image)
 
-        for y in range(y_tiles):
-            for x in range(x_tiles):
-                box = (x * tile_width, y * tile_height, (x + 1) * tile_width, (y + 1) * tile_height)
-                tile = img_data[y * tile_height:(y + 1) * tile_height, x * tile_width:(x + 1) * tile_width]
+        # Extract the image name (without the extension)
+        image_name = os.path.splitext(os.path.basename(input_image_path))[0]
 
-                if tile.size == 0:
-                    continue
+        # Create a folder for the image
+        output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), image_name)
+        os.makedirs(output_folder, exist_ok=True)
 
-                common_color = self.most_common_color(tile)
-                closest_block = self.find_closest_block_color(common_color)
+        # Define output paths (files will be saved inside the new folder)
+        blocks_data_path = os.path.join(output_folder, "blocks_data.txt")
+        blocks_needed_path = os.path.join(output_folder, "blocks_needed.txt")
 
-                block_image = self.block_images[closest_block].resize((tile_width, tile_height), Image.LANCZOS)
-                output_image.paste(block_image, box)
+        block_counts = Counter()
 
-        base_name = os.path.splitext(os.path.basename(input_image_path))[0]
-        output_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{base_name}_converted.png")
-        
-        output_image.save(output_image_path)
-        messagebox.showinfo("Success", f"Conversion completed. Output image saved to {output_image_path}")
+        # Open the files in write mode (this will overwrite the files if they exist)
+        with open(blocks_data_path, "w") as data_file, open(blocks_needed_path, "w") as blocks_needed_file:
+            for y in range(y_tiles):
+                for x in range(x_tiles):
+                    tile = img_data[y * tile_height:(y + 1) * tile_height, x * tile_width:(x + 1) * tile_width]
 
-        input_image_path = self.input_image_path.get()
-        x_tiles = int(self.x_tiles_entry.get())
-        y_tiles = int(self.y_tiles_entry.get())
+                    if tile.size == 0:
+                        continue
 
-        if not input_image_path or not os.path.isfile(input_image_path):
-            messagebox.showerror("Error", "Please select a valid input image.")
-            return
+                    common_color = self.most_common_color(tile)
+                    closest_block = self.find_closest_block_color(common_color)
 
-        if x_tiles > 99:
-            messagebox.showerror("Error", "Maximum number of X tiles is 99.")
-            return
-        if y_tiles > 53:
-            messagebox.showerror("Error", "Maximum number of Y tiles is 53.")
-            return
+                    block_id = block_ids[closest_block]
+                    data_file.write(f"{block_id}, 0, {x}, {y}\n")
 
-        input_image = Image.open(input_image_path)
-        width, height = input_image.size
+                    # Count the block usage
+                    block_counts[closest_block] += 1
 
-        if width > 5000 or height > 5000:
-            messagebox.showerror("Error", "Image resolution is too high. Please select an image with lower resolution.")
-            return
+            # Write the block counts sorted from most needed to least needed
+            sorted_block_counts = sorted(block_counts.items(), key=lambda x: x[1], reverse=True)
+            for block_name, count in sorted_block_counts:
+                blocks_needed_file.write(f"{block_name}: {count}\n")
 
-        tile_width = width // x_tiles
-        tile_height = height // y_tiles
-
-        if tile_width == 0 or tile_height == 0:
-            messagebox.showerror("Error", "Number of tiles is too high for the selected image size.")
-            return
-
-        output_image = Image.new("RGB", (width, height))
-
-        img_data = np.array(input_image)
-
-        for y in range(y_tiles):
-            for x in range(x_tiles):
-                box = (x * tile_width, y * tile_height, (x + 1) * tile_width, (y + 1) * tile_height)
-                tile = img_data[y * tile_height:(y + 1) * tile_height, x * tile_width:(x + 1) * tile_width]
-
-                if tile.size == 0:
-                    continue
-
-                common_color = self.most_common_color(tile)
-                closest_block = self.find_closest_block_color(common_color)
-
-                block_image = self.block_images[closest_block].resize((tile_width, tile_height), Image.LANCZOS)
-                output_image.paste(block_image, box)
-
-        base_name = os.path.splitext(os.path.basename(input_image_path))[0]
-        output_image_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), f"{base_name}_converted.png")
-        
-        output_image.save(output_image_path)
-        messagebox.showinfo("Success", f"Conversion completed. Output image saved to {output_image_path}")
+        messagebox.showinfo("Success", f"Conversion completed. Data saved to {blocks_data_path} and blocks needed to {blocks_needed_path}")
 
     def most_common_color(self, tile):
         if tile.size == 0:
@@ -213,7 +186,7 @@ class ImageConverterApp:
 
         pixels = tile.reshape(-1, tile.shape[-1])
         most_common = Counter(map(tuple, pixels)).most_common(1)
-        
+
         if not most_common:
             messagebox.showerror("Error", "No common color found in the tile.")
             return (0, 0, 0)
@@ -233,6 +206,7 @@ class ImageConverterApp:
                 closest_block = block_name
 
         return closest_block
+
 
 if __name__ == "__main__":
     root = tk.Tk()
