@@ -142,20 +142,16 @@ class ImageConverterApp:
 
         img_data = np.array(input_image)
 
-        # Extract the image name (without the extension)
         image_name = os.path.splitext(os.path.basename(input_image_path))[0]
 
-        # Create a folder for the image
         output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), image_name)
         os.makedirs(output_folder, exist_ok=True)
 
-        # Define output paths (files will be saved inside the new folder)
         blocks_data_path = os.path.join(output_folder, "blocks_data.txt")
         blocks_needed_path = os.path.join(output_folder, "blocks_needed.txt")
 
         block_counts = Counter()
 
-        # Open the files in write mode (this will overwrite the files if they exist)
         with open(blocks_data_path, "w") as data_file, open(blocks_needed_path, "w") as blocks_needed_file:
             for y in range(y_tiles):
                 for x in range(x_tiles):
@@ -170,10 +166,8 @@ class ImageConverterApp:
                     block_id = block_ids[closest_block]
                     data_file.write(f"{block_id}, 0, {x}, {y}\n")
 
-                    # Count the block usage
                     block_counts[closest_block] += 1
 
-            # Write the block counts sorted from most needed to least needed
             sorted_block_counts = sorted(block_counts.items(), key=lambda x: x[1], reverse=True)
             for block_name, count in sorted_block_counts:
                 blocks_needed_file.write(f"{block_name}: {count}\n")
