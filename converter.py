@@ -98,12 +98,12 @@ class ImageConverterApp:
         ttk.Label(self.frame, text="X Tiles ( Length ) :").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
         self.x_tiles_entry = ttk.Entry(self.frame, width=10)
         self.x_tiles_entry.grid(row=1, column=1, padx=5, pady=5)
-        self.x_tiles_entry.insert(0, "99")
+        self.x_tiles_entry.insert(0, "100")
 
         ttk.Label(self.frame, text="Y Tiles ( Width ) :").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
         self.y_tiles_entry = ttk.Entry(self.frame, width=10)
         self.y_tiles_entry.grid(row=2, column=1, padx=5, pady=5)
-        self.y_tiles_entry.insert(0, "53")
+        self.y_tiles_entry.insert(0, "54")
 
         self.convert_button = ttk.Button(self.frame, text="Convert", command=self.convert_image)
         self.convert_button.grid(row=3, column=0, columnspan=3, pady=20)
@@ -122,11 +122,11 @@ class ImageConverterApp:
             messagebox.showerror("Error", "Please select a valid input image.")
             return
 
-        if x_tiles > 99:
-            messagebox.showerror("Error", "Maximum number of X tiles is 99.")
+        if x_tiles > 100:
+            messagebox.showerror("Error", "Maximum number of X tiles is 100.")
             return
-        if y_tiles > 53:
-            messagebox.showerror("Error", "Maximum number of Y tiles is 53.")
+        if y_tiles > 54:
+            messagebox.showerror("Error", "Maximum number of Y tiles is 54.")
             return
         if x_tiles == 0:
             messagebox.showerror("Error", "Minimum number of X tiles is 1.")
