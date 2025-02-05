@@ -1,7 +1,7 @@
 import os
 import numpy as np
 from collections import Counter
-from PIL import Image
+from PIL import Image, ImageTk
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
@@ -69,7 +69,7 @@ class ImageConverterApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Growtopia Image Converter")
-        self.root.geometry("600x400")
+        self.root.geometry("")
         self.root.resizable(False, False)
 
         self.style = ttk.Style()
@@ -82,6 +82,12 @@ class ImageConverterApp:
         self.frame = ttk.Frame(self.root, padding="20")
         self.frame.pack(fill=tk.BOTH, expand=True)
 
+        self.preview_label = ttk.Label(self.frame)
+        self.preview_label.grid(row=5, column=0, columnspan=3, pady=10)
+
+        self.preview_button = ttk.Button(self.frame, text="Show Preview", command=self.show_preview)
+        self.preview_button.grid(row=4, column=0, columnspan=3, pady=10)
+
         self.input_image_path = tk.StringVar()
         ttk.Label(self.frame, text="Search For Image:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
         self.input_image_entry = ttk.Entry(self.frame, textvariable=self.input_image_path, width=40)
@@ -92,12 +98,12 @@ class ImageConverterApp:
         ttk.Label(self.frame, text="X Tiles ( Length ) :").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
         self.x_tiles_entry = ttk.Entry(self.frame, width=10)
         self.x_tiles_entry.grid(row=1, column=1, padx=5, pady=5)
-        self.x_tiles_entry.insert(0, "100")
+        self.x_tiles_entry.insert(0, "99")
 
         ttk.Label(self.frame, text="Y Tiles ( Width ) :").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
         self.y_tiles_entry = ttk.Entry(self.frame, width=10)
         self.y_tiles_entry.grid(row=2, column=1, padx=5, pady=5)
-        self.y_tiles_entry.insert(0, "54")
+        self.y_tiles_entry.insert(0, "53")
 
         self.convert_button = ttk.Button(self.frame, text="Convert", command=self.convert_image)
         self.convert_button.grid(row=3, column=0, columnspan=3, pady=20)
@@ -116,11 +122,17 @@ class ImageConverterApp:
             messagebox.showerror("Error", "Please select a valid input image.")
             return
 
-        if x_tiles > 100:
-            messagebox.showerror("Error", "Maximum number of X tiles is 100.")
+        if x_tiles > 99:
+            messagebox.showerror("Error", "Maximum number of X tiles is 99.")
             return
-        if y_tiles > 54:
-            messagebox.showerror("Error", "Maximum number of Y tiles is 54.")
+        if y_tiles > 53:
+            messagebox.showerror("Error", "Maximum number of Y tiles is 53.")
+            return
+        if x_tiles == 0:
+            messagebox.showerror("Error", "Minimum number of X tiles is 1.")
+            return
+        if y_tiles == 0:
+            messagebox.showerror("Error", "Minimum number of Y tiles is 1.")
             return
 
         input_image = Image.open(input_image_path)
@@ -144,7 +156,7 @@ class ImageConverterApp:
 
         image_name = os.path.splitext(os.path.basename(input_image_path))[0]
 
-        output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), image_name)
+        output_folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "output")
         os.makedirs(output_folder, exist_ok=True)
 
         blocks_data_path = os.path.join(output_folder, "blocks_data.txt")
@@ -164,7 +176,7 @@ class ImageConverterApp:
                     closest_block = self.find_closest_block_color(common_color)
 
                     block_id = block_ids[closest_block]
-                    data_file.write(f"{block_id}, 0, {x}, {y}\n")
+                    data_file.write(f"{x}, {y}, {block_id}\n")
 
                     block_counts[closest_block] += 1
 
@@ -172,7 +184,7 @@ class ImageConverterApp:
             for block_name, count in sorted_block_counts:
                 blocks_needed_file.write(f"{block_name}: {count}\n")
 
-        messagebox.showinfo("Success", f"Conversion completed. Data saved to {blocks_data_path} and blocks needed to {blocks_needed_path}")
+            messagebox.showinfo("Success", f"Conversion completed. Data saved to {output_folder}")
 
     def most_common_color(self, tile):
         if tile.size == 0:
@@ -201,6 +213,36 @@ class ImageConverterApp:
 
         return closest_block
 
+    def show_preview(self):
+        input_image_path = self.input_image_path.get()
+        x_tiles = int(self.x_tiles_entry.get())
+        y_tiles = int(self.y_tiles_entry.get())
+
+        if not input_image_path or not os.path.isfile(input_image_path):
+            messagebox.showerror("Error", "Please select a valid input image.")
+            return
+
+        input_image = Image.open(input_image_path)
+        input_image = input_image.resize((x_tiles, y_tiles), Image.LANCZOS)
+
+        img_data = np.array(input_image)
+        preview_image = Image.new("RGB", (x_tiles * 10, y_tiles * 10))
+
+        for y in range(y_tiles):
+            for x in range(x_tiles):
+                pixel = img_data[y, x, :3]
+                closest_block = self.find_closest_block_color(tuple(pixel))
+
+                block_image_path = os.path.join("blocks", f"{closest_block}.png")
+                
+                if os.path.isfile(block_image_path):
+                    block_image = Image.open(block_image_path)
+                    block_image = block_image.resize((10, 10), Image.NEAREST)
+                    preview_image.paste(block_image, (x * 10, y * 10))
+
+        self.tk_preview = ImageTk.PhotoImage(preview_image)
+        self.preview_label.config(image=self.tk_preview)
+        self.preview_label.image = self.tk_preview 
 
 if __name__ == "__main__":
     root = tk.Tk()
