@@ -17,8 +17,17 @@ This project allows you to convert images into block-based representations for u
 
    ```bash
    pip install -r requirements.txt
+
+## Updates
+
+- Added a "Show Preview" button (May not be the same as in-game, will be fixed soon.
+- Added a .lua file which actually starts building it. (Some features only work in CreativePS)
+- Made it nicer
 ## Before and After Comparison
 
 | Before Conversion | After Conversion |
 | --- | --- |
 | ![Original Image](https://github.com/user-attachments/assets/f1d71edb-50f7-4bf5-9738-7a096c4cbe0a) | ![Converted Image](https://github.com/user-attachments/assets/9d0ee027-b171-4fc2-a439-b0b15c3660b1) |
+
+
+Full Credits to xMandq!!!
