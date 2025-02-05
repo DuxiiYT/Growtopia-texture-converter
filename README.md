@@ -26,6 +26,10 @@ Full Credits to xMandq!!!
    ```bash
    pip install -r requirements.txt
 
-| Before Conversion | After Conversion |
-| --- | --- |
-| ![Original Image](https://github.com/user-attachments/assets/f1d71edb-50f7-4bf5-9738-7a096c4cbe0a) | ![Converted Image](https://github.com/user-attachments/assets/9d0ee027-b171-4fc2-a439-b0b15c3660b1) |
+| Before Conversion | Preview | In-game showcase |
+| ![Original Image](https://github.com/user-attachments/assets/f0674205-3eb2-43ef-ab02-7ff9edf18c7b)
+| ![Previewed Image](https://github.com/user-attachments/assets/e5a6e50c-ff91-43ef-8db0-384e585a93b8)
+| ![In-game Image](https://github.com/user-attachments/assets/6cff28ae-b71f-4e38-8de4-25912fba9bcc)
+
+
+
