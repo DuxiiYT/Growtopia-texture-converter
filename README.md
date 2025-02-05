@@ -15,6 +15,7 @@ Full Credits to xMandq!!!
 - Automatically resizes images to fit within the 99x53 tile grid size limit.
 - Color matching algorithm to find the closest Growtopia block for each section.
 - Supports multiple block types for more accurate representations.
+- Currently only works if you have Long Place!
 
 ## Installation
 
